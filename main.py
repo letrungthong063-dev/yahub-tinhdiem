@@ -63,10 +63,12 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-@app.get("/ping")
-async def ping():
-    return {"status": "ok"}
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 
+@app.api_route("/ping", methods=["GET", "HEAD"])
+async def ping():
+    return JSONResponse({"status": "ok"})
 
 # ================= AUTH HELPER =================
 
