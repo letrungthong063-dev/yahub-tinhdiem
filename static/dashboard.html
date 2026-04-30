@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo Bảng Xếp Hạng - YAHUB</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon: #00f5ff; --neon2: #ff3cac; --gold: #ffd700;
+            --dark: #05080f; --card: rgba(13,18,32,0.85); --border: rgba(0,245,255,0.15);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Rajdhani', sans-serif; background: var(--dark); color: #e0e8ff; min-height: 100vh; }
+        .bg-grid { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(0,245,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(0,245,255,0.025) 1px, transparent 1px); background-size: 60px 60px; pointer-events: none; }
+        .main { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+
+        /* Page header */
+        .page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+        .page-icon { font-size: 36px; filter: drop-shadow(0 0 16px var(--neon)); }
+        .page-title { font-family: 'Orbitron', monospace; font-size: 24px; font-weight: 700; color: #fff; }
+        .page-sub { font-size: 13px; color: rgba(255,255,255,0.3); margin-top: 3px; font-family: 'Inter', sans-serif; }
+
+        /* Grid layout */
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+        /* Cards */
+        .panel {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 16px; backdrop-filter: blur(16px);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 18px 24px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(0,245,255,0.03);
+        }
+        .panel-header-icon { font-size: 18px; }
+        .panel-header-title { font-family: 'Orbitron', monospace; font-size: 13px; letter-spacing: 2px; color: var(--neon); font-weight: 700; }
+        .panel-body { padding: 24px; }
+
+        /* Form fields */
+        .field { margin-bottom: 18px; }
+        .field label { display: flex; align-items: center; gap: 6px; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 7px; font-weight: 600; }
+        .field label .req { color: var(--neon2); font-size: 14px; }
+        .field input, .field select {
+            width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,245,255,0.12);
+            border-radius: 8px; padding: 11px 14px; color: #fff;
+            font-family: 'Rajdhani', sans-serif; font-size: 16px; outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .field input:focus, .field select:focus { border-color: var(--neon); box-shadow: 0 0 16px rgba(0,245,255,0.1); }
+        .field input::placeholder { color: rgba(255,255,255,0.18); }
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        /* Advanced options */
+        .adv-toggle {
+            display: flex; align-items: center; gap: 8px; cursor: pointer;
+            color: rgba(255,255,255,0.35); font-size: 13px; letter-spacing: 1px;
+            padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: 8px; margin-bottom: 4px; user-select: none; transition: color 0.2s;
+            background: none; border-bottom: none; width: 100%; text-align: left;
+        }
+        .adv-toggle:hover { color: var(--neon); }
+        .adv-toggle .arrow { transition: transform 0.3s; }
+        .adv-toggle.open .arrow { transform: rotate(180deg); }
+        .adv-body { display: none; padding-top: 16px; }
+        .adv-body.open { display: block; }
+        .field-hint { font-size: 11px; color: rgba(255,255,255,0.2); margin-top: 4px; font-family: 'Inter', sans-serif; }
+
+        /* File input */
+        .file-label {
+            display: flex; align-items: center; gap: 10px; padding: 11px 14px;
+            background: rgba(0,0,0,0.5); border: 1px dashed rgba(0,245,255,0.2);
+            border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 14px; color: rgba(255,255,255,0.35);
+        }
+        .file-label:hover { border-color: var(--neon); color: var(--neon); }
+        input[type="file"] { display: none; }
+
+        /* Error */
+        .error-box { background: rgba(255,77,109,0.1); border: 1px solid rgba(255,77,109,0.3); color: #ff6b85; padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 18px; display: none; }
+
+        /* Submit button */
+        .btn-create {
+            width: 100%; padding: 15px; border: none; border-radius: 10px; cursor: pointer;
+            font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700; letter-spacing: 3px;
+            text-transform: uppercase; transition: all 0.3s;
+            background: linear-gradient(135deg, var(--neon), #007acc);
+            color: var(--dark); box-shadow: 0 0 30px rgba(0,245,255,0.2);
+        }
+        .btn-create:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 0 50px rgba(0,245,255,0.4); }
+        .btn-create:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* Result panel */
+        .result-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; gap: 16px; color: rgba(255,255,255,0.15); }
+        .placeholder-icon { font-size: 56px; filter: grayscale(1) opacity(0.3); }
+        .placeholder-text { font-size: 15px; letter-spacing: 2px; font-family: 'Orbitron', monospace; font-size: 11px; }
+
+        /* Loading */
+        .loading-wrap { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; gap: 20px; }
+        .spinner {
+            width: 56px; height: 56px; border-radius: 50%;
+            border: 3px solid rgba(0,245,255,0.1);
+            border-top-color: var(--neon);
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-family: 'Orbitron', monospace; font-size: 12px; letter-spacing: 2px; color: var(--neon); animation: pulse 1.5s ease-in-out infinite; }
+        @keyframes pulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        /* Result content */
+        .result-content { display: none; }
+        .result-img { width: 100%; border-radius: 10px; margin-bottom: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.6); }
+        .btn-download {
+            width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer;
+            font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700; letter-spacing: 2px;
+            background: linear-gradient(135deg, #00cc66, #008844); color: #fff;
+            box-shadow: 0 0 20px rgba(0,204,102,0.2); transition: all 0.3s; margin-bottom: 16px;
+        }
+        .btn-download:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(0,204,102,0.4); }
+
+        /* Match info */
+        .match-stats { background: rgba(0,0,0,0.3); border: 1px solid rgba(0,245,255,0.08); border-radius: 8px; padding: 14px; }
+        .stats-header { font-family: 'Orbitron', monospace; font-size: 11px; letter-spacing: 2px; color: var(--neon); margin-bottom: 12px; }
+        .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-key { color: rgba(255,255,255,0.35); }
+        .stat-val { font-weight: 700; }
+        .match-list { margin-top: 10px; max-height: 160px; overflow-y: auto; }
+        .match-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .match-row:last-child { border-bottom: none; }
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+        .badge-ok { background: rgba(0,204,102,0.15); color: #00cc66; border: 1px solid rgba(0,204,102,0.2); }
+        .badge-fail { background: rgba(255,77,109,0.15); color: #ff4d6d; border: 1px solid rgba(255,77,109,0.2); }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div id="navbar"></div>
+    <div class="main">
+        <div class="page-header">
+            <div class="page-icon">⚡</div>
+            <div>
+                <div class="page-title">TẠO BẢNG XẾP HẠNG</div>
+                <div class="page-sub">Nhập thông tin trận đấu để tạo BXH tự động</div>
+            </div>
+        </div>
+        <div class="dashboard-grid">
+            <!-- Form Panel -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-header-icon">📝</div>
+                    <div class="panel-header-title">THÔNG TIN TRẬN ĐẤU</div>
+                </div>
+                <div class="panel-body">
+                    <div id="error" class="error-box"></div>
+                    <div class="field">
+                        <label>Account ID <span class="req">*</span></label>
+                        <input type="text" id="accountid" placeholder="Nhập Account ID" required>
+                    </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <label>Thời gian bắt đầu <span class="req">*</span></label>
+                            <input type="text" id="start_time" placeholder="23/03/2026 19:00" required>
+                        </div>
+                        <div class="field">
+                            <label>Thời gian kết thúc <span class="req">*</span></label>
+                            <input type="text" id="end_time" placeholder="23/03/2026 23:00" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Background <span class="req">*</span> — <a href="/backgrounds" style="color:var(--neon);font-size:11px;text-decoration:none;">xem danh sách ↗</a></label>
+                        <input type="text" id="background" placeholder="Nhập tên background, vd: bg1" required>
+                    </div>
+                    <div class="field">
+                        <label>Tên giải đấu</label>
+                        <input type="text" id="custom_name" placeholder="Tên tùy chỉnh (tùy chọn)">
+                    </div>
+
+                    <button class="adv-toggle" id="advToggle" onclick="toggleAdv()">
+                        <span>⚙</span> Tùy chọn nâng cao <span class="arrow">▾</span>
+                    </button>
+                    <div class="adv-body" id="advBody">
+                        <div class="field">
+                            <label>Xóa trận</label>
+                            <input type="text" id="remove_match" placeholder="Vd: 1,3 (số thứ tự trận cách nhau bằng dấu phẩy)">
+                        </div>
+                        <div class="field">
+                            <label>Đặt tên đội theo ID</label>
+                            <input type="text" id="team_names" placeholder="Vd: 12345=Team A,54321=Team B">
+                        </div>
+                        <div class="field">
+                            <label>Logo tùy chỉnh</label>
+                            <label class="file-label" for="logo_custom">
+                                <span>📁</span>
+                                <span id="fileLabel">Chọn ảnh logo (tối đa 10MB)</span>
+                            </label>
+                            <input type="file" id="logo_custom" accept="image/*" onchange="updateFileLabel(this)">
+                        </div>
+                        <div class="field">
+                            <label>Champion Rush</label>
+                            <input type="number" id="champion_rush" value="0" min="0" placeholder="0">
+                        </div>
+                    </div>
+
+                    <button class="btn-create" id="submitBtn" onclick="createBXH()">
+                        ⚡ TẠO BẢNG XẾP HẠNG
+                    </button>
+                </div>
+            </div>
+
+            <!-- Result Panel -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-header-icon">🏆</div>
+                    <div class="panel-header-title">KẾT QUẢ</div>
+                </div>
+                <div class="panel-body">
+                    <div class="result-placeholder" id="placeholder">
+                        <div class="placeholder-icon">🏆</div>
+                        <div class="placeholder-text">KẾT QUẢ SẼ HIỂN THỊ Ở ĐÂY</div>
+                    </div>
+                    <div class="loading-wrap" id="loading">
+                        <div class="spinner"></div>
+                        <div class="loading-text">ĐANG XỬ LÝ...</div>
+                    </div>
+                    <div class="result-content" id="result">
+                        <img id="resultImg" class="result-img" alt="BXH">
+                        <button class="btn-download" id="downloadBtn">⬇ TẢI XUỐNG PNG</button>
+                        <div class="match-stats" id="matchInfo"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/auth.js"></script>
+    <script>
+        requireAuth();
+        document.getElementById("navbar").innerHTML = renderNavbar("/dashboard");
+        checkNotification();
+
+        function toggleAdv() {
+            const toggle = document.getElementById("advToggle");
+            const body = document.getElementById("advBody");
+            toggle.classList.toggle("open");
+            body.classList.toggle("open");
+        }
+
+        function updateFileLabel(input) {
+            const label = document.getElementById("fileLabel");
+            label.textContent = input.files[0] ? input.files[0].name : "Chọn ảnh logo (tối đa 10MB)";
+        }
+
+        async function createBXH() {
+            const errorDiv = document.getElementById("error");
+            const loading = document.getElementById("loading");
+            const result = document.getElementById("result");
+            const placeholder = document.getElementById("placeholder");
+            const btn = document.getElementById("submitBtn");
+
+            errorDiv.style.display = "none";
+            loading.style.display = "flex";
+            result.style.display = "none";
+            placeholder.style.display = "none";
+            btn.disabled = true;
+            btn.textContent = "ĐANG XỬ LÝ...";
+
+            const logoFile = document.getElementById("logo_custom").files[0];
+            const formData = new FormData();
+            formData.append("accountid", document.getElementById("accountid").value);
+            formData.append("start_time", document.getElementById("start_time").value);
+            formData.append("end_time", document.getElementById("end_time").value);
+            formData.append("background", document.getElementById("background").value);
+            formData.append("custom_name", document.getElementById("custom_name").value);
+            formData.append("remove_match", document.getElementById("remove_match").value);
+            formData.append("team_names", document.getElementById("team_names").value);
+            formData.append("champion_rush", parseInt(document.getElementById("champion_rush").value) || 0);
+            if (logoFile) formData.append("logo_custom", logoFile);
+
+            try {
+                const res = await fetch("/api/bxh", {
+                    method: "POST",
+                    headers: {"Authorization": `Bearer ${getToken()}`},
+                    body: formData
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail);
+
+                const img = document.getElementById("resultImg");
+                img.src = `data:image/png;base64,${data.image}`;
+
+                document.getElementById("downloadBtn").onclick = () => {
+                    const a = document.createElement("a");
+                    a.href = img.src;
+                    a.download = "leaderboard.png";
+                    a.click();
+                };
+
+                const ok = data.match_details.filter(m => m.success).length;
+                const total = data.match_details.length;
+                const matchRows = data.match_details.map(m =>
+                    `<div class="match-row">
+                        <span class="badge ${m.success ? 'badge-ok' : 'badge-fail'}">${m.success ? '✓' : '✗'}</span>
+                        <span style="color:rgba(255,255,255,0.5)">Trận ${m.index}</span>
+                        <span style="margin-left:auto;color:var(--gold)">Booyah: ${m.booyah}</span>
+                    </div>`
+                ).join("");
+
+                document.getElementById("matchInfo").innerHTML = `
+                    <div class="stats-header">CHI TIẾT TRẬN ĐẤU</div>
+                    <div class="stat-row"><span class="stat-key">Số đội</span><span class="stat-val" style="color:var(--neon)">${data.team_count}</span></div>
+                    <div class="stat-row"><span class="stat-key">Tổng trận</span><span class="stat-val">${total}</span></div>
+                    <div class="stat-row"><span class="stat-key">Thành công</span><span class="stat-val" style="color:#00cc66">${ok}/${total}</span></div>
+                    <div class="match-list">${matchRows}</div>
+                `;
+
+                loading.style.display = "none";
+                result.style.display = "block";
+            } catch (err) {
+                loading.style.display = "none";
+                placeholder.style.display = "flex";
+                errorDiv.textContent = err.message;
+                errorDiv.style.display = "block";
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "⚡ TẠO BẢNG XẾP HẠNG";
+            }
+        }
+    </script>
+</body>
+</html>

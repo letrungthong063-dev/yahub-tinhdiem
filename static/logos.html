@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Logo - YAHUB</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon: #00f5ff; --neon2: #ff3cac; --dark: #05080f; --card: rgba(13,18,32,0.85); --border: rgba(0,245,255,0.15); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Rajdhani', sans-serif; background: var(--dark); color: #e0e8ff; min-height: 100vh; }
+        .bg-grid { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(0,245,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(0,245,255,0.025) 1px, transparent 1px); background-size: 60px 60px; pointer-events: none; }
+        .main { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 32px 20px; }
+        .page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+        .page-icon { font-size: 36px; }
+        .page-title { font-family: 'Orbitron', monospace; font-size: 24px; font-weight: 700; }
+        .page-sub { font-size: 13px; color: rgba(255,255,255,0.3); margin-top: 3px; font-family: 'Inter', sans-serif; }
+
+        /* Create card */
+        .create-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 28px; backdrop-filter: blur(16px); }
+        .create-title { font-family: 'Orbitron', monospace; font-size: 12px; letter-spacing: 3px; color: var(--neon); margin-bottom: 16px; }
+        .create-row { display: flex; gap: 12px; }
+        .create-row input {
+            flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,245,255,0.12);
+            border-radius: 8px; padding: 11px 14px; color: #fff; font-family: 'Rajdhani', sans-serif;
+            font-size: 16px; outline: none; transition: border-color 0.2s;
+        }
+        .create-row input:focus { border-color: var(--neon); }
+        .create-row input::placeholder { color: rgba(255,255,255,0.2); }
+        .btn-create {
+            padding: 11px 24px; border: none; border-radius: 8px; cursor: pointer;
+            font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700; letter-spacing: 2px;
+            background: linear-gradient(135deg, var(--neon), #007acc); color: var(--dark);
+            white-space: nowrap; transition: all 0.2s;
+        }
+        .btn-create:hover { box-shadow: 0 0 30px rgba(0,245,255,0.3); }
+        .err-inline { color: #ff6b85; font-size: 13px; margin-top: 8px; display: none; }
+
+        /* Logo sets */
+        .logo-set {
+            background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+            margin-bottom: 16px; overflow: hidden; backdrop-filter: blur(16px);
+        }
+        .logo-set-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; }
+        .logo-set-name { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 700; }
+        .logo-set-id { font-size: 11px; color: rgba(255,255,255,0.2); font-family: 'Inter', sans-serif; margin-top: 3px; }
+        .logo-set-actions { display: flex; gap: 8px; }
+        .btn-add {
+            padding: 7px 16px; border: none; border-radius: 6px; cursor: pointer;
+            font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 1px;
+            background: rgba(0,245,255,0.1); border: 1px solid rgba(0,245,255,0.2); color: var(--neon); transition: all 0.2s;
+        }
+        .btn-add:hover { background: rgba(0,245,255,0.2); }
+        .btn-del {
+            padding: 7px 16px; border: none; border-radius: 6px; cursor: pointer;
+            font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 1px;
+            background: rgba(255,77,109,0.1); border: 1px solid rgba(255,77,109,0.2); color: #ff6b85; transition: all 0.2s;
+        }
+        .btn-del:hover { background: rgba(255,77,109,0.2); }
+
+        /* Modal */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal.open { display: flex; }
+        .modal-card { background: #0d1220; border: 1px solid var(--border); border-radius: 18px; padding: 36px; width: 100%; max-width: 420px; box-shadow: 0 40px 80px rgba(0,0,0,0.6); }
+        .modal-title { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 700; margin-bottom: 24px; }
+        .field { margin-bottom: 18px; }
+        .field label { display: block; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 7px; }
+        .field input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,245,255,0.12); border-radius: 8px; padding: 11px 14px; color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 16px; outline: none; transition: border-color 0.2s; }
+        .field input:focus { border-color: var(--neon); }
+        .file-label { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: rgba(0,0,0,0.5); border: 1px dashed rgba(0,245,255,0.2); border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 14px; color: rgba(255,255,255,0.35); }
+        .file-label:hover { border-color: var(--neon); color: var(--neon); }
+        input[type="file"] { display: none; }
+        .modal-actions { display: flex; gap: 12px; }
+        .btn-upload { flex: 1; padding: 13px; border: none; border-radius: 8px; cursor: pointer; font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700; letter-spacing: 2px; background: linear-gradient(135deg, var(--neon), #007acc); color: var(--dark); transition: all 0.2s; }
+        .btn-cancel { flex: 1; padding: 13px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 600; background: transparent; color: rgba(255,255,255,0.4); transition: all 0.2s; }
+        .btn-cancel:hover { background: rgba(255,255,255,0.05); }
+        .modal-error { color: #ff6b85; font-size: 13px; margin-bottom: 16px; display: none; }
+        .empty-text { color: rgba(255,255,255,0.2); font-family: 'Orbitron', monospace; font-size: 13px; letter-spacing: 3px; text-align: center; padding: 60px 0; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div id="navbar"></div>
+    <div class="main">
+        <div class="page-header">
+            <div class="page-icon">🏷️</div>
+            <div>
+                <div class="page-title">QUẢN LÝ LOGO</div>
+                <div class="page-sub">Tạo và quản lý bộ logo cho các giải đấu</div>
+            </div>
+        </div>
+        <div class="create-card">
+            <div class="create-title">// TẠO BỘ LOGO MỚI</div>
+            <div class="create-row">
+                <input type="text" id="newKeyLogo" placeholder="Tên bộ logo (vd: giai1)">
+                <button class="btn-create" onclick="createLogoSet()">+ TẠO</button>
+            </div>
+            <div class="err-inline" id="createError"></div>
+        </div>
+        <div id="logoSets"><div class="empty-text">ĐANG TẢI...</div></div>
+    </div>
+
+    <div class="modal" id="uploadModal">
+        <div class="modal-card">
+            <div class="modal-title">🏷️ THÊM LOGO VÀO BỘ</div>
+            <div class="modal-error" id="uploadError"></div>
+            <div class="field">
+                <label>ID người chơi</label>
+                <input type="text" id="uploadTeamId" placeholder="123456789012">
+            </div>
+            <div class="field">
+                <label>Ảnh logo (tối đa 10MB)</label>
+                <label class="file-label" for="uploadFile">
+                    <span>📁</span>
+                    <span id="uploadFileLabel">Chọn ảnh...</span>
+                </label>
+                <input type="file" id="uploadFile" accept="image/*" onchange="updateUploadLabel(this)">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-upload" onclick="uploadLogo()">⬆ UPLOAD</button>
+                <button class="btn-cancel" onclick="closeModal()">Hủy</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/auth.js"></script>
+    <script>
+        requireAuth();
+        document.getElementById("navbar").innerHTML = renderNavbar("/logos");
+        checkNotification();
+        let currentLogoSetId = null;
+
+        function updateUploadLabel(input) {
+            document.getElementById("uploadFileLabel").textContent = input.files[0] ? input.files[0].name : "Chọn ảnh...";
+        }
+
+        async function loadLogoSets() {
+            const res = await fetch("/api/logos", {headers: authHeaders()});
+            const data = await res.json();
+            const container = document.getElementById("logoSets");
+            if (!data.logo_sets.length) {
+                container.innerHTML = "<div class='empty-text'>CHƯA CÓ BỘ LOGO NÀO</div>";
+                return;
+            }
+            container.innerHTML = data.logo_sets.map(ls => `
+                <div class="logo-set">
+                    <div class="logo-set-header">
+                        <div>
+                            <div class="logo-set-name">${ls.key_logo}</div>
+                            <div class="logo-set-id">ID: ${ls.id}</div>
+                        </div>
+                        <div class="logo-set-actions">
+                            <button class="btn-add" onclick="openUploadModal('${ls.id}')">+ Thêm logo</button>
+                            <button class="btn-del" onclick="deleteLogoSet('${ls.id}','${ls.key_logo}')">Xóa</button>
+                        </div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        async function createLogoSet() {
+            const key = document.getElementById("newKeyLogo").value.trim();
+            const errDiv = document.getElementById("createError");
+            errDiv.style.display = "none";
+            if (!key) { errDiv.textContent = "Vui lòng nhập tên bộ logo"; errDiv.style.display = "block"; return; }
+            const res = await fetch("/api/logos", { method: "POST", headers: authHeaders(), body: JSON.stringify({key_logo: key}) });
+            const data = await res.json();
+            if (!res.ok) { errDiv.textContent = data.detail; errDiv.style.display = "block"; return; }
+            document.getElementById("newKeyLogo").value = "";
+            loadLogoSets();
+        }
+
+        async function deleteLogoSet(id, name) {
+            if (!confirm(`Xóa bộ logo "${name}"?`)) return;
+            const res = await fetch(`/api/logos/${id}`, {method: "DELETE", headers: authHeaders()});
+            if (res.ok) loadLogoSets();
+        }
+
+        function openUploadModal(logoSetId) {
+            currentLogoSetId = logoSetId;
+            document.getElementById("uploadModal").classList.add("open");
+        }
+
+        function closeModal() {
+            document.getElementById("uploadModal").classList.remove("open");
+            document.getElementById("uploadTeamId").value = "";
+            document.getElementById("uploadFile").value = "";
+            document.getElementById("uploadFileLabel").textContent = "Chọn ảnh...";
+            document.getElementById("uploadError").style.display = "none";
+        }
+
+        async function uploadLogo() {
+            const teamId = document.getElementById("uploadTeamId").value.trim();
+            const file = document.getElementById("uploadFile").files[0];
+            const errDiv = document.getElementById("uploadError");
+            errDiv.style.display = "none";
+            if (!teamId || !file) { errDiv.textContent = "Vui lòng điền đầy đủ thông tin"; errDiv.style.display = "block"; return; }
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("team_id", teamId);
+            const res = await fetch(`/api/logos/${currentLogoSetId}/upload`, { method: "POST", headers: {"Authorization": `Bearer ${getToken()}`}, body: formData });
+            const data = await res.json();
+            if (!res.ok) { errDiv.textContent = data.detail; errDiv.style.display = "block"; return; }
+            closeModal();
+            alert("Upload logo thành công!");
+        }
+
+        loadLogoSets();
+    </script>
+</body>
+</html>

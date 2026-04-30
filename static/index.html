@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YAHUB - Bảng Xếp Hạng Free Fire</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon: #00f5ff;
+            --neon2: #ff3cac;
+            --gold: #ffd700;
+            --dark: #05080f;
+            --dark2: #0a0e1a;
+            --card: #0d1220;
+            --border: rgba(0,245,255,0.2);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--dark);
+            color: #e0e8ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .bg-grid {
+            position: fixed; inset: 0; z-index: 0;
+            background-image:
+                linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+        .glow-orb {
+            position: fixed; border-radius: 50%; filter: blur(120px); opacity: 0.15; z-index: 0;
+        }
+        .orb1 { width: 600px; height: 600px; background: var(--neon); top: -200px; left: -200px; }
+        .orb2 { width: 500px; height: 500px; background: var(--neon2); bottom: -150px; right: -150px; }
+        .container { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }
+        .logo-wrap { text-align: center; margin-bottom: 60px; }
+        .logo-icon { font-size: 64px; margin-bottom: 16px; filter: drop-shadow(0 0 20px var(--neon)); }
+        .logo-text {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(48px, 8vw, 80px);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--neon), #fff, var(--neon2));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: 4px;
+            text-shadow: none;
+            filter: drop-shadow(0 0 30px rgba(0,245,255,0.5));
+        }
+        .tagline {
+            font-size: 18px; color: rgba(255,255,255,0.5); letter-spacing: 3px;
+            text-transform: uppercase; margin-top: 12px; font-weight: 300; font-family: 'Inter', sans-serif;
+        }
+        .card-glass {
+            background: rgba(13,18,32,0.8);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 48px 40px;
+            width: 100%; max-width: 420px;
+            box-shadow: 0 0 60px rgba(0,245,255,0.08), inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+        .card-title { font-family: 'Orbitron', monospace; font-size: 14px; letter-spacing: 4px; color: var(--neon); text-transform: uppercase; text-align: center; margin-bottom: 36px; }
+        .btn {
+            display: block; width: 100%; padding: 14px 28px; border: none; border-radius: 8px;
+            font-family: 'Rajdhani', sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 2px;
+            text-align: center; text-decoration: none; cursor: pointer; transition: all 0.3s;
+            text-transform: uppercase; margin-bottom: 14px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon), #0099cc);
+            color: var(--dark);
+            box-shadow: 0 0 30px rgba(0,245,255,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(0,245,255,0.5); }
+        .btn-secondary {
+            background: transparent; color: var(--neon);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover { background: rgba(0,245,255,0.08); border-color: var(--neon); }
+        .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 60px; max-width: 860px; width: 100%; }
+        .feat {
+            background: rgba(13,18,32,0.6); border: 1px solid var(--border);
+            border-radius: 12px; padding: 24px; text-align: center; backdrop-filter: blur(10px);
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .feat:hover { border-color: var(--neon); transform: translateY(-4px); }
+        .feat-icon { font-size: 32px; margin-bottom: 12px; }
+        .feat-title { font-family: 'Orbitron', monospace; font-size: 13px; letter-spacing: 2px; color: var(--neon); margin-bottom: 8px; }
+        .feat-desc { font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.5; }
+        @media (max-width: 640px) { .features { grid-template-columns: 1fr; } .card-glass { padding: 32px 24px; } }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="glow-orb orb1"></div>
+    <div class="glow-orb orb2"></div>
+    <div class="container">
+        <div class="logo-wrap">
+            <div class="logo-icon">🏆</div>
+            <div class="logo-text">YAHUB</div>
+            <div class="tagline">Free Fire Leaderboard System</div>
+        </div>
+        <div class="card-glass">
+            <div class="card-title">// Truy cập hệ thống</div>
+            <a href="/login" class="btn btn-primary">Đăng nhập</a>
+            <a href="/register" class="btn btn-secondary">Tạo tài khoản mới</a>
+        </div>
+        <div class="features">
+            <div class="feat">
+                <div class="feat-icon">⚡</div>
+                <div class="feat-title">Tự động</div>
+                <div class="feat-desc">Tạo BXH chỉ trong vài giây từ dữ liệu trận đấu</div>
+            </div>
+            <div class="feat">
+                <div class="feat-icon">🎨</div>
+                <div class="feat-title">Tùy chỉnh</div>
+                <div class="feat-desc">Nhiều background & logo đội cho từng giải đấu</div>
+            </div>
+            <div class="feat">
+                <div class="feat-icon">📊</div>
+                <div class="feat-title">Lịch sử</div>
+                <div class="feat-desc">Lưu trữ và tải lại bảng xếp hạng bất cứ lúc nào</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        if (localStorage.getItem("token")) window.location.href = "/dashboard";
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+aiohttp
+Pillow
+supabase
+python-multipart

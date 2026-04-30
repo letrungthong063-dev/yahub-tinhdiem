@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backgrounds - YAHUB</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon: #00f5ff; --neon2: #ff3cac; --dark: #05080f; --card: rgba(13,18,32,0.85); --border: rgba(0,245,255,0.15); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Rajdhani', sans-serif; background: var(--dark); color: #e0e8ff; min-height: 100vh; }
+        .bg-grid { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(0,245,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(0,245,255,0.025) 1px, transparent 1px); background-size: 60px 60px; pointer-events: none; }
+        .main { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+        .page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+        .page-icon { font-size: 36px; filter: drop-shadow(0 0 16px var(--neon)); }
+        .page-title { font-family: 'Orbitron', monospace; font-size: 24px; font-weight: 700; }
+        .page-sub { font-size: 13px; color: rgba(255,255,255,0.3); margin-top: 3px; font-family: 'Inter', sans-serif; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .bg-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 14px; overflow: hidden; backdrop-filter: blur(16px);
+            transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        .bg-card:hover { border-color: var(--neon); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,245,255,0.12); }
+        .bg-preview { width: 100%; height: 160px; object-fit: cover; background: rgba(0,0,0,0.3); display: block; }
+        .bg-placeholder { width: 100%; height: 160px; background: linear-gradient(135deg, rgba(0,245,255,0.05), rgba(255,60,172,0.05)); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.15); font-size: 13px; font-family: 'Orbitron', monospace; letter-spacing: 2px; }
+        .bg-footer { padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
+        .bg-name { font-family: 'Orbitron', monospace; font-size: 13px; color: #fff; font-weight: 700; letter-spacing: 1px; }
+        .btn-copy {
+            padding: 5px 12px; border-radius: 6px; border: 1px solid rgba(0,245,255,0.2);
+            background: rgba(0,245,255,0.06); color: var(--neon); cursor: pointer;
+            font-size: 12px; font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .btn-copy:hover { background: rgba(0,245,255,0.15); border-color: var(--neon); }
+        .btn-copy.copied { background: rgba(0,204,102,0.15); border-color: #00cc66; color: #00cc66; }
+        .loading-text { color: rgba(255,255,255,0.2); font-family: 'Orbitron', monospace; font-size: 13px; letter-spacing: 3px; text-align: center; padding: 60px 0; }
+        .empty-text { color: rgba(255,255,255,0.2); font-size: 15px; text-align: center; padding: 60px 0; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div id="navbar"></div>
+    <div class="main">
+        <div class="page-header">
+            <div class="page-icon">🎨</div>
+            <div>
+                <div class="page-title">BACKGROUNDS</div>
+                <div class="page-sub">Danh sách background có sẵn — click để copy tên</div>
+            </div>
+        </div>
+        <div id="bgList"><div class="loading-text">ĐANG TẢI...</div></div>
+    </div>
+    <script src="/static/auth.js"></script>
+    <script>
+        requireAuth();
+        document.getElementById("navbar").innerHTML = renderNavbar("/backgrounds");
+        checkNotification();
+
+        async function loadBackgrounds() {
+            const res = await fetch("/api/backgrounds", {headers: authHeaders()});
+            const data = await res.json();
+            const container = document.getElementById("bgList");
+            if (!data.backgrounds.length) {
+                container.innerHTML = "<div class='empty-text'>Chưa có background nào</div>";
+                return;
+            }
+            container.innerHTML = `<div class="grid">${data.backgrounds.map(bg => `
+                <div class="bg-card" onclick="copyName('${bg}', this)">
+                    <img class="bg-preview" src="/api/backgrounds/${bg}/preview" alt="${bg}"
+                         onerror="this.outerHTML='<div class=\\'bg-placeholder\\'>NO PREVIEW</div>'">
+                    <div class="bg-footer">
+                        <span class="bg-name">${bg}</span>
+                        <button class="btn-copy" onclick="event.stopPropagation();copyName('${bg}', this.closest('.bg-card').querySelector('.btn-copy'))">Copy</button>
+                    </div>
+                </div>
+            `).join("")}</div>`;
+        }
+
+        function copyName(name, el) {
+            navigator.clipboard.writeText(name).then(() => {
+                const btns = document.querySelectorAll(".btn-copy");
+                btns.forEach(b => b.classList.remove("copied"));
+                // find button in el
+                const btn = el.tagName === "BUTTON" ? el : el.querySelector(".btn-copy");
+                if (btn) { btn.textContent = "✓ Copied"; btn.classList.add("copied"); setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("copied"); }, 1500); }
+            });
+        }
+        loadBackgrounds();
+    </script>
+</body>
+</html>

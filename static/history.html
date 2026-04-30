@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử - YAHUB</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon: #00f5ff; --neon2: #ff3cac; --gold: #ffd700; --dark: #05080f; --card: rgba(13,18,32,0.85); --border: rgba(0,245,255,0.15); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Rajdhani', sans-serif; background: var(--dark); color: #e0e8ff; min-height: 100vh; }
+        .bg-grid { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(0,245,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(0,245,255,0.025) 1px, transparent 1px); background-size: 60px 60px; pointer-events: none; }
+        .main { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+        .page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+        .page-icon { font-size: 36px; }
+        .page-title { font-family: 'Orbitron', monospace; font-size: 24px; font-weight: 700; }
+        .page-sub { font-size: 13px; color: rgba(255,255,255,0.3); margin-top: 3px; font-family: 'Inter', sans-serif; }
+        .history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .hist-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+            overflow: hidden; backdrop-filter: blur(16px); transition: border-color 0.3s, transform 0.3s;
+        }
+        .hist-card:hover { border-color: rgba(0,245,255,0.4); transform: translateY(-3px); }
+        .hist-img { width: 100%; display: block; cursor: pointer; }
+        .hist-body { padding: 16px; }
+        .hist-meta { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .hist-bg { font-family: 'Orbitron', monospace; font-size: 12px; color: var(--neon); letter-spacing: 1px; background: rgba(0,245,255,0.08); padding: 3px 10px; border-radius: 20px; border: 1px solid rgba(0,245,255,0.2); }
+        .hist-date { font-size: 12px; color: rgba(255,255,255,0.25); font-family: 'Inter', sans-serif; }
+        .hist-time { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 12px; }
+        .btn-dl {
+            width: 100%; padding: 10px; border: none; border-radius: 8px; cursor: pointer;
+            font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; letter-spacing: 2px;
+            background: linear-gradient(135deg, rgba(0,204,102,0.2), rgba(0,136,68,0.2));
+            border: 1px solid rgba(0,204,102,0.25); color: #00cc66; transition: all 0.2s;
+            text-decoration: none; display: block; text-align: center;
+        }
+        .btn-dl:hover { background: linear-gradient(135deg, rgba(0,204,102,0.3), rgba(0,136,68,0.3)); }
+        .empty-text { color: rgba(255,255,255,0.2); font-family: 'Orbitron', monospace; font-size: 13px; letter-spacing: 3px; text-align: center; padding: 80px 0; }
+        .notice { font-size: 13px; color: rgba(255,255,255,0.2); font-family: 'Inter', sans-serif; margin-bottom: 20px; padding: 10px 16px; background: rgba(0,245,255,0.04); border: 1px solid rgba(0,245,255,0.08); border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div id="navbar"></div>
+    <div class="main">
+        <div class="page-header">
+            <div class="page-icon">📋</div>
+            <div>
+                <div class="page-title">LỊCH SỬ BXH</div>
+                <div class="page-sub">10 bảng xếp hạng gần nhất của bạn</div>
+            </div>
+        </div>
+        <div class="notice">💡 Hệ thống lưu tối đa 10 bảng xếp hạng gần nhất. Hãy tải xuống trước khi tạo mới.</div>
+        <div id="historyList"><div class="empty-text">ĐANG TẢI...</div></div>
+    </div>
+    <script src="/static/auth.js"></script>
+    <script>
+        requireAuth();
+        document.getElementById("navbar").innerHTML = renderNavbar("/history");
+        checkNotification();
+
+        async function loadHistory() {
+            const res = await fetch("/api/history", {headers: authHeaders()});
+            const data = await res.json();
+            const container = document.getElementById("historyList");
+            if (!data.history.length) {
+                container.innerHTML = "<div class='empty-text'>CHƯA CÓ LỊCH SỬ NÀO</div>";
+                return;
+            }
+            container.innerHTML = `<div class="history-grid">${data.history.map(h => `
+                <div class="hist-card">
+                    <img src="${h.image_url}" class="hist-img" alt="BXH" onclick="window.open('${h.image_url}','_blank')">
+                    <div class="hist-body">
+                        <div class="hist-meta">
+                            <span class="hist-bg">${h.background}</span>
+                            <span class="hist-date">${new Date(h.created_at).toLocaleDateString("vi-VN")}</span>
+                        </div>
+                        <div class="hist-time">🕐 ${h.start_time} — ${h.end_time || "..."}</div>
+                        <a href="${h.image_url}" download="leaderboard.png" class="btn-dl">⬇ TẢI XUỐNG</a>
+                    </div>
+                </div>
+            `).join("")}</div>`;
+        }
+        loadHistory();
+    </script>
+</body>
+</html>

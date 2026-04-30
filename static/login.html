@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - YAHUB</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon: #00f5ff; --neon2: #ff3cac; --dark: #05080f; --dark2: #0a0e1a;
+            --card: #0d1220; --border: rgba(0,245,255,0.2); --err: #ff4d6d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Rajdhani', sans-serif; background: var(--dark); color: #e0e8ff; min-height: 100vh; }
+        .bg-grid {
+            position: fixed; inset: 0; z-index: 0;
+            background-image: linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+        .orb { position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.12; z-index: 0; }
+        .orb1 { width: 500px; height: 500px; background: var(--neon); top: -100px; right: -100px; }
+        .orb2 { width: 400px; height: 400px; background: var(--neon2); bottom: -100px; left: -100px; }
+        .page { position: relative; z-index: 1; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .card {
+            background: rgba(13,18,32,0.9); border: 1px solid var(--border);
+            backdrop-filter: blur(24px); border-radius: 20px; padding: 48px 40px;
+            width: 100%; max-width: 440px;
+            box-shadow: 0 0 80px rgba(0,245,255,0.06), 0 40px 80px rgba(0,0,0,0.5);
+        }
+        .back-link { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.3); font-size: 13px; letter-spacing: 1px; text-decoration: none; margin-bottom: 36px; transition: color 0.2s; }
+        .back-link:hover { color: var(--neon); }
+        .card-header { text-align: center; margin-bottom: 40px; }
+        .card-icon { font-size: 40px; margin-bottom: 12px; filter: drop-shadow(0 0 16px var(--neon)); }
+        .card-title { font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 700; color: #fff; letter-spacing: 2px; }
+        .card-sub { font-size: 14px; color: rgba(255,255,255,0.35); margin-top: 6px; font-family: 'Inter', sans-serif; }
+        .field { margin-bottom: 20px; }
+        .field label { display: block; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--neon); margin-bottom: 8px; font-weight: 600; }
+        .field input {
+            width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,245,255,0.15);
+            border-radius: 8px; padding: 12px 16px; color: #fff; font-family: 'Rajdhani', sans-serif;
+            font-size: 16px; outline: none; transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .field input:focus { border-color: var(--neon); box-shadow: 0 0 20px rgba(0,245,255,0.1); }
+        .field input::placeholder { color: rgba(255,255,255,0.2); }
+        .error-box {
+            background: rgba(255,77,109,0.1); border: 1px solid rgba(255,77,109,0.3);
+            color: #ff6b85; padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; display: none;
+        }
+        .btn-submit {
+            width: 100%; padding: 15px; border: none; border-radius: 10px; cursor: pointer;
+            font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; letter-spacing: 3px;
+            text-transform: uppercase; transition: all 0.3s; margin-top: 8px;
+            background: linear-gradient(135deg, var(--neon), #007acc);
+            color: var(--dark); box-shadow: 0 0 30px rgba(0,245,255,0.25);
+        }
+        .btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 0 50px rgba(0,245,255,0.4); }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+        .divider { text-align: center; margin: 28px 0; color: rgba(255,255,255,0.15); font-size: 12px; letter-spacing: 2px; position: relative; }
+        .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: rgba(255,255,255,0.08); }
+        .divider::before { left: 0; } .divider::after { right: 0; }
+        .register-link { text-align: center; font-size: 14px; color: rgba(255,255,255,0.35); }
+        .register-link a { color: var(--neon); text-decoration: none; font-weight: 600; transition: opacity 0.2s; }
+        .register-link a:hover { opacity: 0.7; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="page">
+        <div class="card">
+            <a href="/" class="back-link">← YAHUB</a>
+            <div class="card-header">
+                <div class="card-icon">🔐</div>
+                <div class="card-title">ĐĂNG NHẬP</div>
+                <div class="card-sub">Truy cập hệ thống YAHUB BXH</div>
+            </div>
+            <div id="error" class="error-box"></div>
+            <div class="field">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="your@email.com" required>
+            </div>
+            <div class="field">
+                <label>Mật khẩu</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            <button class="btn-submit" id="submitBtn" onclick="doLogin()">ĐĂNG NHẬP</button>
+            <div class="divider">HOẶC</div>
+            <div class="register-link">Chưa có tài khoản? <a href="/register">Đăng ký ngay</a></div>
+        </div>
+    </div>
+    <script>
+        if (localStorage.getItem("token")) window.location.href = "/dashboard";
+        document.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+
+        async function doLogin() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const errorDiv = document.getElementById("error");
+            const btn = document.getElementById("submitBtn");
+            errorDiv.style.display = "none";
+            btn.disabled = true; btn.textContent = "ĐANG XỬ LÝ...";
+            try {
+                const res = await fetch("/api/login", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({email, password})
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail);
+                localStorage.setItem("token", data.access_token);
+                localStorage.setItem("user", JSON.stringify(data.user));
+                window.location.href = "/dashboard";
+            } catch (err) {
+                errorDiv.textContent = err.message;
+                errorDiv.style.display = "block";
+                btn.disabled = false; btn.textContent = "ĐĂNG NHẬP";
+            }
+        }
+    </script>
+</body>
+</html>

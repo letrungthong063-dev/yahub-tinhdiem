@@ -1,0 +1,34 @@
+{
+    "layout": "two_column",
+    "font_size": 32,
+    "offset": 20,
+
+    "name_x": 882,
+    "name_y": 192,
+    "time_x": 258,
+    "time_y": 1046,
+    "time_font_size": 35,
+
+    "top1_team_x": 814,
+    "top1_team_y": 364,
+    "top1_elims_x": 667,
+    "top1_booyah_x": 807,
+    "top1_total_x": 922,
+    "top1_stats_y": 495,
+    "top1_logo_x": 315,
+    "top1_logo_y": 481,
+
+    "left_team_x": 340,
+    "left_elims_x": 657,
+    "left_booyah_x": 772,
+    "left_total_x": 912,
+    "left_logo_x": 270,
+    "left_y": [626, 711, 796, 877, 958],
+
+    "right_team_x": 1197,
+    "right_elims_x": 1512,
+    "right_booyah_x": 1636,
+    "right_total_x": 1774,
+    "right_logo_x": 1128,
+    "right_y": [327, 415, 500, 590, 682, 763, 853, 940]
+}

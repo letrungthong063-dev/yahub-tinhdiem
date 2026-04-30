@@ -1,0 +1,19 @@
+{
+    "team_x": 330,
+    "elims_x": 850,
+    "booyah_x": 1030,
+    "total_x": 1150,
+    "start_y": 880,
+    "line_height": 80,
+    "font_size": 38,
+    "time_x": 145,
+    "time_y": 750,
+    "time_font_size": 45,
+    "name_x": 390,
+    "name_y": 1985,
+    "name_font_size": 35,
+    "name_color": "white",
+    "logo_x": 255,
+    "logo_size": 50,
+    "logo_offset_y": 55
+}
